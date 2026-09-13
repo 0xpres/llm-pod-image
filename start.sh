@@ -5,18 +5,25 @@ MODEL_NAME="${MODEL_NAME:-Qwen/Qwen2.5-72B-Instruct-AWQ}"
 QUANTIZATION="${QUANTIZATION:-awq}"
 MAX_MODEL_LEN="${MAX_MODEL_LEN:-8192}"
 GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.95}"
+TENSOR_PARALLEL_SIZE="${TENSOR_PARALLEL_SIZE:-1}"
 HF_CACHE_DIR="${HF_CACHE_DIR:-/workspace/hf-cache}"
 WEBUI_DATA_DIR="${WEBUI_DATA_DIR:-/workspace/openwebui-data}"
 
 mkdir -p "$HF_CACHE_DIR" "$WEBUI_DATA_DIR"
 export HF_HOME="$HF_CACHE_DIR"
 
-echo "[start.sh] Subindo vLLM com modelo: $MODEL_NAME"
+QUANT_ARGS=()
+if [ -n "$QUANTIZATION" ]; then
+  QUANT_ARGS=(--quantization "$QUANTIZATION")
+fi
+
+echo "[start.sh] Subindo vLLM com modelo: $MODEL_NAME (tensor-parallel-size=$TENSOR_PARALLEL_SIZE)"
 python3 -m vllm.entrypoints.openai.api_server \
   --model "$MODEL_NAME" \
-  --quantization "$QUANTIZATION" \
+  "${QUANT_ARGS[@]}" \
   --max-model-len "$MAX_MODEL_LEN" \
   --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
+  --tensor-parallel-size "$TENSOR_PARALLEL_SIZE" \
   --enable-auto-tool-choice \
   --tool-call-parser hermes \
   --download-dir "$HF_CACHE_DIR" \
