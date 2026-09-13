@@ -2,7 +2,7 @@
 set -e
 
 MODEL_NAME="${MODEL_NAME:-Qwen/Qwen2.5-72B-Instruct-AWQ}"
-QUANTIZATION="${QUANTIZATION:-awq}"
+QUANTIZATION="${QUANTIZATION-awq}"
 MAX_MODEL_LEN="${MAX_MODEL_LEN:-8192}"
 GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.95}"
 TENSOR_PARALLEL_SIZE="${TENSOR_PARALLEL_SIZE:-1}"
@@ -17,7 +17,7 @@ if [ -n "$QUANTIZATION" ]; then
   QUANT_ARGS=(--quantization "$QUANTIZATION")
 fi
 
-echo "[start.sh] Subindo vLLM com modelo: $MODEL_NAME (tensor-parallel-size=$TENSOR_PARALLEL_SIZE)"
+echo "[start.sh] Subindo vLLM com modelo: $MODEL_NAME (tensor-parallel-size=$TENSOR_PARALLEL_SIZE, quantization='$QUANTIZATION')"
 python3 -m vllm.entrypoints.openai.api_server \
   --model "$MODEL_NAME" \
   "${QUANT_ARGS[@]}" \
